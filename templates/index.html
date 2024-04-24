@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Scheduler</title>
+
+    <style>/* General Body Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        
+        /* Header Styles */
+        h1, h2 {
+            color: #2C3E50;
+            text-align: center;
+        }
+        
+        /* Div Containers */
+        .current.task, .add.task, .upcoming.tasks {
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Form Styles */
+        form {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        input[type="text"], input[type="date"], input[type="number"] {
+            width: 90%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        /* Task List Styles */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body> 
+    <div class="current task">
+        <h1>Task Scheduler</h1>
+        {% if next_task %}
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <p>Next Task: {{ next_task.name }}</p>
+                    <p>Deadline: {{ next_task.deadline }}</p>
+                    <span id="duration-{{ next_task.name }}">{{ next_task.duration }}</span> minutes
+                </div>
+                <div>
+                    {% if next_task.is_running %}
+                        <p>Timer is running...</p>
+                        <form method="post" action="{{ url_for('stop_timer', task_name=next_task.name) }}"></form>
+                            <button type="submit">Stop Timer</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ url_for('start_timer', task_name=next_task.name) }}">
+                            <button type="submit">Start Timer</button>
+                        </form>
+                    {% endif %}
+                    <form action="/complete/{{ next_task.name }}" method="post"></form>
+                        <button type="submit">Mark as Completed</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <p>All tasks are completed!</p>
+        {% endif %}
+    </div>
+    
+    <div class="add task">
+        <h2>Add Task</h2>
+        <form action="/add" method="post">
+            <div>
+                <label for="name">Task Name:</label>
+                <input type="text" id="name" name="name">
+            </div>
+            <div>
+                <div>
+                    <label for="deadline">Deadline:</label>
+                </div>
+                <div>
+                    <input type="date" id="deadline" name="deadline">
+                </div>
+            </div>
+            <div>
+                <label for="duration">Duration:</label>
+                <input type="number" id="duration" name="duration">
+            </div>
+            <button type="submit">Add Task</button>
+        </form>
+    </div>
+    <div class="upcoming tasks">
+        <h2>Tasks</h2>
+        <ul>
+            {% for task in tasks %}
+                <li>{{ task.name }} - {{ task.deadline }} - {{ task.duration }} hours</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
